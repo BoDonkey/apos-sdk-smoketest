@@ -43,7 +43,7 @@ function wait(ms = 300) { return new Promise(r => setTimeout(r, ms)); }
 const TEST_IMAGE = 'test-image.png';
 
 function createFileFromBuffer(buffer, filename, mimeType) {
-  try { if (typeof File !== 'undefined') return new File([buffer], filename, { type: mimeType }); } catch(_) {}
+  try { if (typeof File !== 'undefined') return new File([buffer], filename, { type: mimeType }); } catch (_) { }
   const { Readable } = require('stream');
   return {
     name: filename,
@@ -54,7 +54,7 @@ function createFileFromBuffer(buffer, filename, mimeType) {
     arrayBuffer: async () => buffer,
     stream: () => Readable.from(buffer),
     text: async () => buffer.toString(),
-    slice: (s=0,e=buffer.length,t=mimeType) => createFileFromBuffer(buffer.slice(s,e), filename, t)
+    slice: (s = 0, e = buffer.length, t = mimeType) => createFileFromBuffer(buffer.slice(s, e), filename, t)
   };
 }
 
@@ -65,10 +65,10 @@ async function createTestAttachment() {
   const buf = fs.readFileSync(imagePath);
   if (!buf.length) throw new Error(`${TEST_IMAGE} is empty`);
   // Light signature check (PNG/JPEG/GIF) just for nicer logs
-  const isPNG = buf.length>=8 && buf.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A]));
-  const isJPEG = buf.length>=3 && buf.subarray(0,3).equals(Buffer.from([0xFF,0xD8,0xFF]));
-  const isGIF = buf.length>=6 && ['GIF89a','GIF87a'].includes(buf.subarray(0,6).toString('ascii'));
-  console.log(`   📸 Detected: ${isPNG?'PNG':isJPEG?'JPEG':isGIF?'GIF':'unknown'} (${buf.length} bytes)`);
+  const isPNG = buf.length >= 8 && buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]));
+  const isJPEG = buf.length >= 3 && buf.subarray(0, 3).equals(Buffer.from([0xFF, 0xD8, 0xFF]));
+  const isGIF = buf.length >= 6 && ['GIF89a', 'GIF87a'].includes(buf.subarray(0, 6).toString('ascii'));
+  console.log(`   📸 Detected: ${isPNG ? 'PNG' : isJPEG ? 'JPEG' : isGIF ? 'GIF' : 'unknown'} (${buf.length} bytes)`);
   const file = createFileFromBuffer(buf, 'test-media.png', 'image/png');
   const { status, data } = await attachmentsApi.attachmentUpload(file, 'draft');
   if (status !== 200 || !data?._id) throw new Error('Attachment upload failed');
@@ -83,7 +83,7 @@ async function safeDeleteDocument(itemId, kind, deleteMethod, unpublishMethod) {
       try { await unpublishMethod.call(mediaApi, itemId); console.log(`   📤 Unpublished ${kind}`); await wait(400); }
       catch (e) {
         if (e.response?.status === 404) console.log('   ℹ️ Not published, continuing');
-        else console.log(`   ⚠️ Unpublish failed: ${e.response?.status||''}`);
+        else console.log(`   ⚠️ Unpublish failed: ${e.response?.status || ''}`);
       }
     }
     const tryIds = [itemId, itemId.replace(':en:published', ':en:draft'), itemId.split(':')[0]];
@@ -134,9 +134,9 @@ async function runMediaTests() {
   // 1) Create Image
   console.log('\n📷 Test 1: imagePost');
   try {
-    const payload = { title: 'SDK Test Image', slug: 'sdk-test-image-'+Date.now(), attachment: { _id: state.attachment._id } };
+    const payload = { title: 'SDK Test Image', slug: 'sdk-test-image-' + Date.now(), attachment: { _id: state.attachment._id } };
     const { status, data } = await mediaApi.imagePost(payload);
-    if (status===200 && data?._id) { state.imageId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'image' }); logTest('Create image', true, `${data._id}`); }
+    if (status === 200 && data?._id) { state.imageId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'image' }); logTest('Create image', true, `${data._id}`); }
     else logTest('Create image', false, 'Unexpected response');
   } catch (e) { logTest('Create image', false, e.message); }
   await wait();
@@ -144,8 +144,8 @@ async function runMediaTests() {
   // 2) imageGet (list)
   console.log('\n📷 Test 2: imageGet');
   try {
-    const { status, data } = await mediaApi.imageGet(1,10);
-    if (status===200 && data) { logTest('List images', true, `keys=${Object.keys(data)}`); }
+    const { status, data } = await mediaApi.imageGet(1, 10);
+    if (status === 200 && data) { logTest('List images', true, `keys=${Object.keys(data)}`); }
     else logTest('List images', false);
   } catch (e) { logTest('List images', false, e.message); }
   await wait();
@@ -170,7 +170,7 @@ async function runMediaTests() {
   try {
     const patch = { title: 'SDK Test Image — Updated', alt: 'Updated alt text' };
     const { status, data } = await mediaApi.imagePatchById(state.imageId, patch);
-    if (status===200 && data?.title===patch.title) logTest('Patch image', true, data.title);
+    if (status === 200 && data?.title === patch.title) logTest('Patch image', true, data.title);
     else logTest('Patch image', false, 'Title not updated');
   } catch (e) { logTest('Patch image', false, e.message); }
   await wait();
@@ -184,14 +184,14 @@ async function runMediaTests() {
     const aposDocId = state.imageAposDocId || imgData.aposDocId || imgData._id;
     const urls = imgData?.attachment?._urls || {};
     const sizes = Object.keys(urls);
-  
+
     if (!sizes.length) {
       logTest('Get image src', false, 'no rendition sizes available on attachment._urls');
     } else {
       // Prefer the largest available size
-      const preferredOrder = ['max','full','original','large','medium','small','thumbnail'];
+      const preferredOrder = ['max', 'full', 'original', 'large', 'medium', 'small', 'thumbnail'];
       const pick = preferredOrder.find(s => sizes.includes(s)) || sizes[0];
-  
+
       // A) Verify preferred size (this is the old Test 5)
       const resp = await mediaApi.imageGetSrcById(aposDocId, pick, undefined, 80);
       const status = resp.status;
@@ -206,7 +206,7 @@ async function runMediaTests() {
       } else {
         logTest('Get image src (preferred)', false, `status=${status} ctype=${ctype || 'n/a'} size=${pick}`);
       }
-  
+
       // B) Verify ALL sizes available on this same image (this replaces Advanced Test 3)
       let okCount = 0;
       for (const size of sizes) {
@@ -242,31 +242,31 @@ async function runMediaTests() {
   // 6) filePost
   console.log('\n📁 Test 6: filePost');
   try {
-    const payload = { title: 'SDK Test File', slug: 'sdk-test-file-'+Date.now(), attachment: { _id: state.attachment._id } };
+    const payload = { title: 'SDK Test File', slug: 'sdk-test-file-' + Date.now(), attachment: { _id: state.attachment._id } };
     const { status, data } = await mediaApi.filePost(payload);
-    if (status===200 && data?._id) { state.fileId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'file' }); logTest('Create file', true, `${data._id}`); }
+    if (status === 200 && data?._id) { state.fileId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'file' }); logTest('Create file', true, `${data._id}`); }
     else logTest('Create file', false);
   } catch (e) { logTest('Create file', false, e.message); }
   await wait();
 
   // 7) fileGet
   console.log('\n📁 Test 7: fileGet');
-  try { const { status, data } = await mediaApi.fileGet(1,10); if (status===200) logTest('List files', true, `keys=${Object.keys(data)}`); else logTest('List files', false); }
+  try { const { status, data } = await mediaApi.fileGet(1, 10); if (status === 200) logTest('List files', true, `keys=${Object.keys(data)}`); else logTest('List files', false); }
   catch (e) { logTest('List files', false, e.message); }
   await wait();
 
   // 8) fileGetById
   console.log('\n📁 Test 8: fileGetById');
-  try { const { status, data } = await mediaApi.fileGetById(state.fileId); if (status===200 && data?._id===state.fileId) logTest('Get file by id', true, data.title); else logTest('Get file by id', false); }
+  try { const { status, data } = await mediaApi.fileGetById(state.fileId); if (status === 200 && data?._id === state.fileId) logTest('Get file by id', true, data.title); else logTest('Get file by id', false); }
   catch (e) { logTest('Get file by id', false, e.message); }
   await wait();
 
   // 9) imageTagPost (unique slug)
   console.log('\n🏷️ Test 9: imageTagPost');
   try {
-    const tag = { title: 'SDK Test Image Tag', slug: 'sdk-test-image-tag-'+Date.now() };
+    const tag = { title: 'SDK Test Image Tag', slug: 'sdk-test-image-tag-' + Date.now() };
     const { status, data } = await mediaApi.imageTagPost(tag);
-    if (status===200 && data?._id) { state.imageTagId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'imageTag' }); logTest('Create image tag', true, data.slug); }
+    if (status === 200 && data?._id) { state.imageTagId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'imageTag' }); logTest('Create image tag', true, data.slug); }
     else logTest('Create image tag', false);
   } catch (e) { logTest('Create image tag', false, e.message); }
   await wait();
@@ -274,22 +274,22 @@ async function runMediaTests() {
   // 10) fileTagPost (unique slug)
   console.log('\n🏷️ Test 10: fileTagPost');
   try {
-    const tag = { title: 'SDK Test File Tag', slug: 'sdk-test-file-tag-'+Date.now() };
+    const tag = { title: 'SDK Test File Tag', slug: 'sdk-test-file-tag-' + Date.now() };
     const { status, data } = await mediaApi.fileTagPost(tag);
-    if (status===200 && data?._id) { state.fileTagId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'fileTag' }); logTest('Create file tag', true, data.slug); }
+    if (status === 200 && data?._id) { state.fileTagId = data._id; state.created.push({ id: data._id, aposDocId: data.aposDocId, type: 'fileTag' }); logTest('Create file tag', true, data.slug); }
     else logTest('Create file tag', false);
   } catch (e) { logTest('Create file tag', false, e.message); }
   await wait();
 
   // 11) imageTagGet
   console.log('\n🏷️ Test 11: imageTagGet');
-  try { const { status, data } = await mediaApi.imageTagGet(); if (status===200) logTest('List image tags', true, `count=${data.results?.length ?? 'n/a'}`); else logTest('List image tags', false); }
+  try { const { status, data } = await mediaApi.imageTagGet(); if (status === 200) logTest('List image tags', true, `count=${data.results?.length ?? 'n/a'}`); else logTest('List image tags', false); }
   catch (e) { logTest('List image tags', false, e.message); }
   await wait();
 
   // 12) fileTagGet
   console.log('\n🏷️ Test 12: fileTagGet');
-  try { const { status, data } = await mediaApi.fileTagGet(); if (status===200) logTest('List file tags', true, `count=${data.results?.length ?? 'n/a'}`); else logTest('List file tags', false); }
+  try { const { status, data } = await mediaApi.fileTagGet(); if (status === 200) logTest('List file tags', true, `count=${data.results?.length ?? 'n/a'}`); else logTest('List file tags', false); }
   catch (e) { logTest('List file tags', false, e.message); }
   await wait();
 
@@ -297,10 +297,10 @@ async function runMediaTests() {
   console.log('\n📷 Test 13: imagePublishById');
   try {
     const { status } = await mediaApi.imagePublishById(state.imageId);
-    if (status===200) logTest('Publish image', true);
+    if (status === 200) logTest('Publish image', true);
     else logTest('Publish image', false, `status=${status}`);
   } catch (e) {
-    if (e.response?.status===400) logTest('Publish image', true, 'already published');
+    if (e.response?.status === 400) logTest('Publish image', true, 'already published');
     else logTest('Publish image', false, e.message);
   }
   await wait();
@@ -309,7 +309,7 @@ async function runMediaTests() {
   console.log('\n🔍 Test 14: imageGet (pagination/search)');
   try {
     const { status, data } = await mediaApi.imageGet(1, 5, 'SDK', 'draft', 'en', false);
-    if (status===200) logTest('Search images', true, `found=${data.results?.length ?? 0}`);
+    if (status === 200) logTest('Search images', true, `found=${data.results?.length ?? 0}`);
     else logTest('Search images', false);
   } catch (e) { logTest('Search images', false, e.message); }
   await wait();
@@ -346,12 +346,12 @@ async function runAdvancedMediaTests() {
     if (!ids.length) { console.log('   ℹ️ No images to archive; sending empty payload'); }
     try {
       const a = await mediaApi.imageArchive({ _ids: ids });
-      logTest('Archive images', a.status===200, `count=${ids.length}`);
+      logTest('Archive images', a.status === 200, `count=${ids.length}`);
       await wait(800);
       const r = await mediaApi.imageRestore({ _ids: ids });
-      logTest('Restore images', r.status===200, `count=${ids.length}`);
+      logTest('Restore images', r.status === 200, `count=${ids.length}`);
     } catch (e) {
-      if (e.response?.status===400 && !ids.length) logTest('Archive images (empty)', true, 'expected 400');
+      if (e.response?.status === 400 && !ids.length) logTest('Archive images (empty)', true, 'expected 400');
       else logTest('Archive/Restore', false, e.message);
     }
   } catch (e) { logTest('Archive setup', false, e.message); }
@@ -360,12 +360,12 @@ async function runAdvancedMediaTests() {
   // Adv 2: Autocrop (if available)
   console.log('\n✂️ Adv 2: imageAutocrop');
   try {
-    const res = await mediaApi.imageGet(1,1,'SDK','draft');
+    const res = await mediaApi.imageGet(1, 1, 'SDK', 'draft');
     const id = res.data?.results?.[0] && (res.data.results[0].aposDocId || res.data.results[0]._id);
     if (!id) { logTest('Autocrop', true, 'no image available (skipped)'); }
     else {
       const r = await mediaApi.imageAutocrop({ _ids: [id] });
-      logTest('Autocrop', r.status===200, 'done');
+      logTest('Autocrop', r.status === 200, 'done');
     }
   } catch (e) { logTest('Autocrop', false, e.message); }
   await wait();
@@ -373,14 +373,14 @@ async function runAdvancedMediaTests() {
   // Adv 3: Tagging an image (assign tag)
   console.log('\n🏷️ Adv 3: imageTag (assign)');
   try {
-    const images = await mediaApi.imageGet(1,1,'SDK','draft');
+    const images = await mediaApi.imageGet(1, 1, 'SDK', 'draft');
     const tags = await mediaApi.imageTagGet();
     const imgId = images.data?.results?.[0] && (images.data.results[0].aposDocId || images.data.results[0]._id);
     const tagId = tags.data?.results?.[0] && (tags.data.results[0].aposDocId || tags.data.results[0]._id);
     if (!imgId || !tagId) { logTest('Image tagging', true, 'insufficient data (skipped)'); }
     else {
       const r = await mediaApi.imageTag({ _ids: [imgId], tagIds: [tagId] });
-      logTest('Image tagging', r.status===200, `image=${imgId} tag=${tagId}`);
+      logTest('Image tagging', r.status === 200, `image=${imgId} tag=${tagId}`);
     }
   } catch (e) { logTest('Image tagging', false, e.message); }
   await wait();
@@ -388,8 +388,8 @@ async function runAdvancedMediaTests() {
   // Adv 4: i18n + renderAreas
   console.log('\n🌐 Adv 4: imageGet with renderAreas=true');
   try {
-    const r = await mediaApi.imageGet(1,1,'','draft','en',true);
-    logTest('i18n+render', r.status===200, `results=${r.data?.results?.length ?? 0}`);
+    const r = await mediaApi.imageGet(1, 1, '', 'draft', 'en', true);
+    logTest('i18n+render', r.status === 200, `results=${r.data?.results?.length ?? 0}`);
   } catch (e) { logTest('i18n+render', false, e.message); }
 }
 
@@ -399,7 +399,7 @@ async function runAdvancedMediaTests() {
 async function main() {
   console.log('🚀 ApostropheCMS Media API Test Suite');
   console.log('=====================================');
-  console.log(`🔑 API Key: ${process.env.APOSTROPHE_API_KEY ? '***'+process.env.APOSTROPHE_API_KEY.slice(-4) : 'Not set'}`);
+  console.log(`🔑 API Key: ${process.env.APOSTROPHE_API_KEY ? '***' + process.env.APOSTROPHE_API_KEY.slice(-4) : 'Not set'}`);
   console.log(`🌐 Base URL: ${process.env.APOSTROPHE_BASE_URL || 'http://localhost:3000/api/v1'}`);
   console.log('');
   await runMediaTests();

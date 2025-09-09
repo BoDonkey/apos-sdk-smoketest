@@ -12,9 +12,6 @@
   "type": "commonjs",
   "dependencies": {
     "apostrophecms-client": "file:../typescript-sdk",
-    "axios": "^1.11.0",
-    "dotenv": "^17.2.2",
-    "form-data": "^4.0.4",
-    "undici": "^7.15.0"
+    "dotenv": "^17.2.2"
   }
 }

@@ -60,7 +60,7 @@ async function runAuthenticationTests() {
         if (data.totp !== undefined) console.log(`   - TOTP available: ${data.totp}`);
 
         // Log any other interesting context data
-        const otherKeys = Object.keys(data).filter(key => 
+        const otherKeys = Object.keys(data).filter(key =>
           !['site', 'passwordReset', 'localLogin', 'totp'].includes(key)
         );
         if (otherKeys.length > 0) {
@@ -103,9 +103,9 @@ async function runAuthenticationTests() {
         console.log(`   Username: ${data.username || 'Not provided'}`);
         console.log(`   Title: ${data.title || 'Not provided'}`);
         console.log(`   Email: ${data.email || 'Not provided'}`);
-        
+
         // Log available user fields
-        const userFields = Object.keys(data).filter(key => 
+        const userFields = Object.keys(data).filter(key =>
           !['_id', 'username', 'title', 'email'].includes(key)
         );
         if (userFields.length > 0) {
@@ -157,18 +157,18 @@ async function runAuthenticationTests() {
 
         if (status === 200 && data) {
           logTest('Username/password login', true, 'Login successful');
-          
+
           if (data.token) {
             bearerToken = data.token;
             console.log(`   Bearer token received: ${data.token.substring(0, 20)}...`);
           }
-          
+
           if (data.user) {
             console.log(`   Logged in as: ${data.user.username || data.user.title || 'User'}`);
           }
 
           // Log other response fields
-          const otherFields = Object.keys(data).filter(key => 
+          const otherFields = Object.keys(data).filter(key =>
             !['token', 'user'].includes(key)
           );
           if (otherFields.length > 0) {
@@ -208,15 +208,15 @@ async function runAuthenticationTests() {
 
         if (status === 200 && data) {
           logTest('Session-based login', true, 'Session login successful');
-          
+
           if (data.user) {
             console.log(`   Logged in as: ${data.user.username || data.user.title || 'User'}`);
           }
-          
+
           // Note about session cookies
           console.log('   ℹ️ Session cookie should be set in response headers');
           console.log('   ℹ️ Subsequent requests should include credentials: "include"');
-          
+
           // Check if token is NOT provided (since we requested session)
           if (!data.token) {
             console.log('   ✅ Correctly no bearer token provided for session-based auth');
@@ -273,7 +273,7 @@ async function runAuthenticationTests() {
       if (status === 200) {
         logTest('Logout with API key', true, 'Logout endpoint responded successfully');
         console.log('   ℹ️ API key authentication persists after logout call');
-        
+
         if (data && data.message) {
           console.log(`   Server message: ${data.message}`);
         }
@@ -301,11 +301,11 @@ async function runAuthenticationTests() {
 
         if (status === 200) {
           logTest('Logout with bearer token', true, 'Bearer token logout successful');
-          
+
           // Test if token is now invalid
           await wait(500);
           console.log('   🔄 Testing if bearer token is now invalid...');
-          
+
           try {
             await bearerLogoutAuthApi.authWhoAmIPost();
             console.log('   ⚠️ Bearer token still works after logout (unexpected)');
@@ -358,7 +358,7 @@ async function runPasswordResetTests() {
 
   // Test 1: Request password reset (always succeeds for security reasons)
   console.log('📄 Test 1: Request Password Reset (authResetRequest)');
-  
+
   // Only test with a test email if provided, otherwise skip
   if (process.env.APOSTROPHE_TEST_EMAIL) {
     try {
@@ -372,7 +372,7 @@ async function runPasswordResetTests() {
         logTest('Password reset request', true, 'Reset request processed (always succeeds for security)');
         console.log('   ℹ️ Password reset always returns success, even for invalid emails');
         console.log('   ℹ️ Check server terminal for actual email send status');
-        
+
         if (data && data.message) {
           console.log(`   Server message: ${data.message}`);
         }
@@ -413,7 +413,7 @@ async function runPasswordResetTests() {
 async function main() {
   try {
     await runAuthenticationTests();
-    
+
     // Only run password reset tests if explicitly requested or test email provided
     if (process.env.APOSTROPHE_TEST_EMAIL || process.env.RUN_PASSWORD_RESET_TESTS) {
       await runPasswordResetTests();

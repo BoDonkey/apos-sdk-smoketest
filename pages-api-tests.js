@@ -117,7 +117,7 @@ async function runPagesTests() {
       };
 
       const { status, data } = await pagesApi.pagePost(newPageData);
-      
+
       if (status === 200 && data && data._id) {
         testPageId = data._id;
         logTest('Create new page', true, `Created page with ID: ${testPageId}`);
@@ -137,7 +137,7 @@ async function runPagesTests() {
     if (testPageId) {
       try {
         const { status, data } = await pagesApi.pageGetById(testPageId);
-        
+
         if (status === 200 && data && data._id === testPageId) {
           logTest('Get page by ID', true, `Retrieved page: ${data.title}`);
           console.log(`   Page type: ${data.type}`);
@@ -163,7 +163,7 @@ async function runPagesTests() {
         };
 
         const { status, data } = await pagesApi.pagePatchById(testPageId, updateData);
-        
+
         if (status === 200 && data && data.title === 'SDK Test Page - Updated') {
           logTest('Update page with PATCH', true, `Updated title to: ${data.title}`);
         } else {
@@ -183,7 +183,7 @@ async function runPagesTests() {
     if (testPageId) {
       try {
         const { status, data } = await pagesApi.pagePublishById(testPageId);
-        
+
         if (status === 200 && data) {
           logTest('Publish page', true, `Published page: ${data.title}`);
           console.log(`   Publication state updated`);
@@ -205,7 +205,7 @@ async function runPagesTests() {
     if (testPageId) {
       try {
         const { status, data } = await pagesApi.pageGetLocalesById(testPageId);
-        
+
         if (status === 200) {
           logTest('Get page locales', true, `Retrieved locale information`);
           console.log(`   Locales response:`, Array.isArray(data) ? data : 'Not an array');
@@ -231,7 +231,7 @@ async function runPagesTests() {
           'en', // aposLocale
           true // renderAreas - this should render widget areas as HTML
         );
-        
+
         if (status === 200 && data) {
           logTest('Get page with rendered areas', true, `Retrieved page with HTML rendering`);
           console.log(`   Page has main area: ${!!data.main}`);
@@ -261,7 +261,7 @@ async function runPagesTests() {
         };
 
         const { status, data } = await pagesApi.pagePost(childPageData);
-        
+
         if (status === 200 && data && data._id) {
           childPageId = data._id;
           logTest('Create child page', true, `Created child page with ID: ${childPageId}`);
@@ -356,7 +356,7 @@ async function runPagesTests() {
         };
 
         const { status, data } = await pagesApi.pagePutById(testPageId, moveData);
-        
+
         if (status === 200 && data) {
           logTest('Move page in tree', true, `Moved page to first child position`);
         } else {
@@ -494,7 +494,7 @@ async function runPagesTests() {
             page.title.includes('SDK Child Test Page')
           )
         );
-        
+
         if (remainingTestPages.length === 0) {
           console.log('   ✅ No test pages remain in page tree - cleanup successful');
         } else {
@@ -528,7 +528,7 @@ async function runAdvancedPagesTests() {
     // Try to get available locales
     const { InternationalizationApi } = require('apostrophecms-client');
     const i18nApi = new InternationalizationApi(configuration);
-  
+
     try {
       const { status, data } = await i18nApi.i18nLocalesGet();
       if (status === 200 && typeof data === 'object') {

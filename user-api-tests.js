@@ -86,7 +86,7 @@ async function runUsersApiTests() {
       if (status === 200) {
         const isUnique = data.available || data.unique || !data.exists;
         logTest('Check username uniqueness', true, `Username "${testUsername}" is ${isUnique ? 'available' : 'taken'}`);
-        
+
         if (!isUnique) {
           // Generate a new username if this one is taken
           testUsername = generateTestUsername();
@@ -113,7 +113,7 @@ async function runUsersApiTests() {
       };
 
       const { status, data } = await usersApi.userCreate(newUserData);
-      
+
       if (status === 200 && data && data._id) {
         testUserId = data._id;
         logTest('Create new user', true, `Created user with ID: ${testUserId}`);
@@ -135,7 +135,7 @@ async function runUsersApiTests() {
     if (testUserId) {
       try {
         const { status, data } = await usersApi.userGetById(testUserId);
-        
+
         if (status === 200 && data && data._id === testUserId) {
           logTest('Get user by ID', true, `Retrieved user: ${data.title}`);
           console.log(`   Username: ${data.username}`);
@@ -162,7 +162,7 @@ async function runUsersApiTests() {
         };
 
         const { status, data } = await usersApi.userPatchById(testUserId, updateData);
-        
+
         if (status === 200 && data && data.title.includes('Updated')) {
           logTest('Update user with PATCH', true, `Updated title to: ${data.title}`);
         } else {
@@ -187,7 +187,7 @@ async function runUsersApiTests() {
 
         const { status, data } = await usersApi.userUniqueUsername(uniqueRequest);
         console.log('the data', data);
-        
+
         if (status === 200 && data) {
           const isUnique = data.available || data.unique || !data.exists;
           logTest('Check existing username uniqueness', true, `Username "${testUsername}" is ${isUnique ? 'still available (unexpected)' : 'taken (expected)'}`);

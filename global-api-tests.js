@@ -49,10 +49,10 @@ async function runGlobalContentTests() {
     try {
       // First, let's check if we can access the global content endpoint
       const { status, data } = await globalApi.globalGet();
-      
+
       if (status === 200) {
         logTest('Verify authentication', true, 'Successfully connected to Global Content API');
-        
+
         // Handle both paginated and single document responses
         if (data && data.results && Array.isArray(data.results)) {
           // Paginated response
@@ -88,15 +88,15 @@ async function runGlobalContentTests() {
     console.log('\n📄 Test 2: Get Global Content - Published Mode (globalGet)');
     try {
       const { status, data } = await globalApi.globalGet('published');
-      
+
       if (status === 200) {
         logTest('Get global content (published)', true, 'Retrieved published global content');
-        
+
         // Handle paginated response
         if (data && data.results && Array.isArray(data.results)) {
           console.log(`   Found ${data.results.length} global documents (paginated response)`);
           console.log(`   Total pages: ${data.pages}, Current page: ${data.currentPage}`);
-          
+
           // Look at the first global document
           if (data.results.length > 0) {
             const firstGlobal = data.results[0];
@@ -124,10 +124,10 @@ async function runGlobalContentTests() {
     console.log('\n📄 Test 3: Get Global Content - Draft Mode (globalGet)');
     try {
       const { status, data } = await globalApi.globalGet('draft');
-      
+
       if (status === 200) {
         logTest('Get global content (draft)', true, 'Retrieved draft global content');
-        
+
         // Handle paginated response and store a document ID for later tests
         if (data && data.results && Array.isArray(data.results) && data.results.length > 0) {
           const firstDraft = data.results[0];
@@ -163,17 +163,17 @@ async function runGlobalContentTests() {
         'draft' // Target draft mode for updates
       );
       console.log(data);
-      
+
       if (status === 200 && data) {
         logTest('Update global content', true, 'Successfully updated global content');
-        
+
         // Verify our changes were applied
         if (data.testField === updateData.testField) {
           console.log('   ✓ Test field updated correctly');
         } else {
           console.log('   ⚠️  Test field may not have updated (check if field exists in schema)');
         }
-        
+
         // Update our global document ID
         if (data._id) {
           globalDocumentId = data._id;
@@ -192,7 +192,7 @@ async function runGlobalContentTests() {
     if (globalDocumentId) {
       try {
         const { status, data } = await globalApi.globalGetById(globalDocumentId);
-        
+
         if (status === 200 && data && data._id === globalDocumentId) {
           logTest('Get global content by ID', true, `Retrieved global document: ${data.testField || 'no test field'}`);
           console.log(`   Document ID: ${data._id}`);
@@ -220,10 +220,10 @@ async function runGlobalContentTests() {
         };
 
         const { status, data } = await globalApi.globalPatchById(globalDocumentId, patchData);
-        
+
         if (status === 200 && data) {
           logTest('Patch global content', true, 'Successfully patched global content');
-          
+
           // Verify patch changes
           if (data.testField === patchData.testField) {
             console.log('   ✓ Test field patched correctly');
@@ -247,7 +247,7 @@ async function runGlobalContentTests() {
     if (globalDocumentId) {
       try {
         const { status, data } = await globalApi.globalPublishById(globalDocumentId);
-        
+
         if (status === 200 && data) {
           logTest('Publish global content', true, 'Successfully published global content');
           console.log(`   Published document test field: ${data.testField || 'not set'}`);
@@ -271,19 +271,19 @@ async function runGlobalContentTests() {
     console.log('\n📄 Test 8: Verify Published Content (globalGet published)');
     try {
       const { status, data } = await globalApi.globalGet('published');
-      
+
       if (status === 200 && data) {
         logTest('Verify published content', true, 'Retrieved published global content');
-        
+
         // Handle paginated response
         if (data.results && Array.isArray(data.results)) {
           console.log(`   Found ${data.results.length} published global documents`);
-          
+
           // Look for our test updates in any of the published documents
-          const hasTestUpdates = data.results.some(doc => 
+          const hasTestUpdates = data.results.some(doc =>
             doc.testField && doc.testField.includes('SDK Test')
           );
-          
+
           if (hasTestUpdates) {
             console.log('   ✓ Our test updates are visible in published version');
           } else {
@@ -312,10 +312,10 @@ async function runGlobalContentTests() {
       try {
         const { status, data } = await globalApi.globalGetLocalesById(globalDocumentId);
         console.log('internationalization', data)
-        
+
         if (status === 200) {
           logTest('Get global document locales', true, 'Retrieved locale information');
-          
+
           if (Array.isArray(data)) {
             console.log(`   Available locales: ${data.length > 0 ? data.join(', ') : 'none configured'}`);
           } else {
@@ -343,7 +343,7 @@ async function runGlobalContentTests() {
       try {
         // First get the current document to preserve required fields
         const { data: currentDoc } = await globalApi.globalGetById(globalDocumentId);
-        
+
         // Prepare complete replacement data
         const putData = {
           ...currentDoc, // Preserve existing structure
@@ -351,10 +351,10 @@ async function runGlobalContentTests() {
         };
 
         const { status, data } = await globalApi.globalPutById(globalDocumentId, putData);
-        
+
         if (status === 200 && data) {
           logTest('Complete replacement with PUT', true, 'Successfully replaced global content');
-          
+
           // Verify replacement
           if (data.testField === putData.testField) {
             console.log('   ✓ Test field replaced correctly');
@@ -375,13 +375,13 @@ async function runGlobalContentTests() {
 
     // Test 11: Test workflow operations (if enabled)
     console.log('\n🔄 Test 11: Test Workflow Operations');
-    
+
     // Test submission (if workflow is enabled)
     console.log('\n📤 Test 11a: Submit for Review (globalSubmitById)');
     if (globalDocumentId) {
       try {
         const { status, data } = await globalApi.globalSubmitById(globalDocumentId);
-        
+
         if (status === 200 && data) {
           logTest('Submit for review', true, 'Successfully submitted global content for review');
         } else {
@@ -404,7 +404,7 @@ async function runGlobalContentTests() {
     // if (globalDocumentId) {
     //   try {
     //     const { status, data } = await globalApi.globalDismissSubmissionById(globalDocumentId);
-        
+
     //     if (status === 200 && data) {
     //       logTest('Dismiss submission', true, 'Successfully dismissed submission');
     //     } else {
@@ -424,13 +424,13 @@ async function runGlobalContentTests() {
 
     // Test 12: Test revert operations
     console.log('\n🔄 Test 12: Test Revert Operations');
-    
+
     // Test reverting draft to published
     console.log('\n↩️  Test 12a: Revert Draft to Published (globalRevertDraftToPublishedById)');
     if (globalDocumentId) {
       try {
         const { status, data } = await globalApi.globalRevertDraftToPublishedById(globalDocumentId);
-        
+
         if (status === 200 && data) {
           logTest('Revert draft to published', true, 'Successfully reverted draft to published version');
         } else {
@@ -450,7 +450,7 @@ async function runGlobalContentTests() {
 
     // Test 13: Archive and restore operations
     console.log('\n🗃️  Test 13: Archive and Restore Operations');
-    
+
     // Test archiving
     console.log('\n📦 Test 13a: Archive Global Content (globalArchive)');
     try {
@@ -460,7 +460,7 @@ async function runGlobalContentTests() {
       };
 
       const { status, data } = await globalApi.globalArchive(archiveData);
-      
+
       if (status === 200) {
         logTest('Archive global content', true, 'Archive operation completed');
       } else {
@@ -483,7 +483,7 @@ async function runGlobalContentTests() {
       };
 
       const { status, data } = await globalApi.globalRestore(restoreData);
-      
+
       if (status === 200) {
         logTest('Restore global content', true, 'Restore operation completed');
       } else {
@@ -502,10 +502,10 @@ async function runGlobalContentTests() {
     console.log('\n✅ Test 14: Final Verification - Global Content Accessibility');
     try {
       const { status, data } = await globalApi.globalGet('published');
-      
+
       if (status === 200 && data) {
         logTest('Final verification', true, 'Global content is still accessible');
-        
+
         // Handle paginated response
         if (data.results && Array.isArray(data.results) && data.results.length > 0) {
           const firstDoc = data.results[0];
